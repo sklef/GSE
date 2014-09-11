@@ -37,7 +37,7 @@ classdef lgse < handle
   end
   
   properties(SetAccess = public)
-      bigVs = 0
+      bigVs = [];
   end
       
   

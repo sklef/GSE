@@ -112,29 +112,33 @@ else
     options.isreal = 1;
     options.issym = 1;
     eigenMatrix = [];
+    this.bigVs = [];
     for index = 1:this.sampleSize
         this.projectionJacobians{index} = zeros(this.originalDimension, this.reducedDimension);
     end
     for currentDim = 1:this.reducedDimension
       if this.newNormalization
-        phi = phi2-phi1
-        phi0 = phi0/sum(sum(phi0))
+        phi = phi2-phi1;
+        phi0 = phi0/sum(sum(phi0));
         [eigenVector, ~] = eigs(phi, phi0, 1, 'SA', options);% W = {v_i}|i=1,n
       else
-        phi = phi0-phi1
-        phi0 = phi0/sum(sum(phi0))
+        phi = phi0-phi1;
+        phi0 = phi0/sum(sum(phi0));
         [eigenVector, ~] = eigs(phi, phi0, 1, 'SA', options);% W = {v_i}|i=1,n
       end
-      eigenVector
-      eigenVector(1 * this.originalDimension:(1 + 1) * this.originalDimension - 1)
       %Recalculating basis
       for pointIndex = 1:this.sampleSize
          
           this.projectionJacobians{pointIndex}(:, currentDim) = this.localPCs{pointIndex} * eigenVector(pointIndex * this.reducedDimension - this.reducedDimension + 1:pointIndex * this.reducedDimension);
-          [this.localPCs{pointIndex}, S] = ...
+          [this.localPCs{pointIndex}, S, v_i, flag] = ...
             findOrthogonalCompliment(this.localPCs{pointIndex}, ...
             eigenVector(pointIndex * this.reducedDimension - this.reducedDimension + 1:pointIndex * this.reducedDimension));
-        
+        if flag == 1
+            this.bigVs = [this.bigVs, pointIndex];
+        end
+        v_i
+        eigenVector(pointIndex * this.reducedDimension - this.reducedDimension + 1:pointIndex * this.reducedDimension)
+        S
         eigenVector(pointIndex * this.reducedDimension - this.reducedDimension + 1:pointIndex * this.reducedDimension) = ...
             S * eigenVector(pointIndex * this.reducedDimension - this.reducedDimension + 1:pointIndex * this.reducedDimension);
       end
