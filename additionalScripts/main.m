@@ -1,0 +1,13 @@
+trainSize = 1000;
+rng(0);
+[trainX, trainTangentSpace, parametrization] = ...
+    generateSampleOnSurface(trainSize, 'ellipsoid');
+mapping = lgse('EuclideanMetricsThreshold', 10, 'EigenValuesThreshold',...
+                Inf, 'CauchyBinetMetricsThreshold', 0.2, 'KernelWidth',...
+                1,'oldWayOptimization', false);
+            
+[trainX, trainTangentSpace, parametrization] = ...
+    generateSampleOnSurface(trainSize, 'ellipsoid');
+mapping.train(trainX, 2);
+reducedTrainX = mapping.compressedTrainPoints
+scatter(reducedTrainX(1, :), reducedTrainX(2, :), [], parametrization(:, 1), 'filled');
