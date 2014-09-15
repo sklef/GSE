@@ -49,6 +49,7 @@ this.iLogger.info('Tangent space alignment')
 
 weightedLinearSpacesProjections = cell(this.sampleSize);
 diagonalLinearSpaceProjections = cell(this.sampleSize,1);
+this.history = cell(this.sampleSize, 1);
 diagonalLinearSpaceProjectionsEigenValues = cell(this.sampleSize,1);
 eyeReducedDimension = eye(reducedDimension);
 
@@ -108,110 +109,18 @@ if this.oldWayOptimization
    end
  end
 else
-    options.disp = 0;
-    options.isreal = 1;
-    options.issym = 1;
-    options.maxit = 100;
-    eigenMatrix = [];
     for index = 1:this.sampleSize
-        this.projectionJacobians{index} = zeros(this.originalDimension, this.reducedDimension);
+        this.projectionJacobians{index} = this.localPCs{index};
     end
-    eigenVectorForMarix = zeros(this.reducedDimension * this.sampleSize, 1);
     for currentDim = 1:this.reducedDimension
-      if this.newNormalization
-        phi = phi2-phi1;
-        phi0 = phi0/sum(sum(phi0));
-        [eigenVector, ~] = eigs(phi, phi0, 1, 'SA', options);% W = {v_i}|i=1,n
-      else
-        phi = phi0-phi1;
-        phi0 = phi0/sum(sum(phi0));
-        [eigenVector, ~] = eigs(phi, phi0, 1, 'SA', options);% W = {v_i}|i=1,n
-      end
-      eigenVector
-      eigenVector(1 * this.originalDimension:(1 + 1) * this.originalDimension - 1)
-      % Recalculating basis
-      newVVector = zeros(this.reducedDimension - currentDim + 1, 1);
-      newVVector(currentDim) = 1;
       for pointIndex = 1:this.sampleSize
-          this.projectionJacobians{pointIndex}(:, currentDim) = this.localPCs{pointIndex}(:, currentDim:end) * ...
-            eigenVector((pointIndex - 1) * (this.reducedDimension - currentDim + 1) + 1:pointIndex * (this.reducedDimension - currentDim + 1));
-          [this.localPCs{pointIndex}, ~] = ...
-            findOrthogonalCompliment(this.localPCs{pointIndex}, ...
-                                     eigenVector((pointIndex - 1) * (this.reducedDimension - currentDim + 1) + 1:pointIndex * (this.reducedDimension - currentDim + 1)));
-        
-          eigenVectorForMarix((pointIndex - 1) * this.reducedDimension + 1:pointIndex * this.reducedDimension) = ...
-            norm(eigenVector((pointIndex - 1) * (this.reducedDimension - currentDim + 1) + 1:pointIndex * (this.reducedDimension - currentDim + 1))) * newVVector;
+          this.calculateJacobianComponent(pointIndex, currentDim, this.kernels, 100);
       end
-      eigenMatrix = [eigenMatrix eigenVectorForMarix];
-      pcaShape = size(this.localPCs{1});
-      if pcaShape(2) == 1
-          for pointIndex = 1:this.sampleSize
-              this.projectionJacobians{pointIndex}(:, currentDim + 1) = this.localPCs{pointIndex};
-          end
-          break
-      end
-      currentPCAParts = this.localPCs;
-      for point = 1:length(this.localPCs)
-        currentPCAParts{point} = currentPCAParts{point}(:, currentDim);
-      end
-      [this.kernels, linearSpacesProjections] = this.adjustKernels(this.kernels, currentPCAParts); %K_1(X_i, X_j) and S(X_i, X_j)
-      weightedLinearSpacesProjections = cell(this.sampleSize);
-      diagonalLinearSpaceProjections = cell(this.sampleSize,1);
-      diagonalLinearSpaceProjectionsEigenValues = cell(this.sampleSize,1);
-      eyeReducedDimension = eye(this.reducedDimension - currentDim);
-      for pointIndex1 = 1:this.sampleSize
-        for pointIndex2 = pointIndex1:this.sampleSize
-          if pointIndex1 == pointIndex2
-            weightedLinearSpacesProjections{pointIndex1, pointIndex2} = eyeReducedDimension;
-          else
-            if this.newNormalization
-              weightedLinearSpacesProjections{pointIndex1, pointIndex2} = this.kernels(pointIndex1,pointIndex2) * ...
-                this.localEigenVals{pointIndex1} * (linearSpacesProjections{pointIndex1, pointIndex2}) * this.localEigenVals{pointIndex2};
-              weightedLinearSpacesProjections{pointIndex2, pointIndex1} = weightedLinearSpacesProjections{pointIndex1, pointIndex2}';
-            else
-              weightedLinearSpacesProjections{pointIndex1, pointIndex2} = this.kernels(pointIndex1,pointIndex2) * ...
-                (linearSpacesProjections{pointIndex1, pointIndex2});
-              weightedLinearSpacesProjections{pointIndex2, pointIndex1} = weightedLinearSpacesProjections{pointIndex1, pointIndex2}';
-            end
-          end
-
-        end
-        diagonalLinearSpaceProjections{pointIndex1} = eyeReducedDimension*sum(this.kernels(pointIndex1, :));
-        if currentDim == 1
-          diagonalLinearSpaceProjectionsInitial{pointIndex1} = eye(this.reducedDimension)*sum(this.kernels(pointIndex1, :));
-        end
-        if this.newNormalization
-          diagonalLinearSpaceProjectionsEigenValues{pointIndex1} = eyeReducedDimension*sum(this.kernels(pointIndex1, :)) * this.localEigenVals{pointIndex1} ^ -2;
-        end
-      end
-      phi1 = cell2mat(weightedLinearSpacesProjections);
-      phi0 = blkdiag(diagonalLinearSpaceProjections{:});
-      if this.newNormalization
-        phi2 = blkdiag(diagonalLinearSpaceProjectionsEigenValues{:});
-      else
-        phi2 = 0;
-      end
-   end
-    this.kernels = this.calculateKernels(trainPoints');
-if this.newNormalization
-  [this.localPCs, this.localEigenVals] = this.calculateWeightedPCA(trainPoints, this.kernels);  % Q(X_i), \Lambda(X_i)
-else
-  this.localPCs = this.calculateWeightedPCA(trainPoints, this.kernels);  % Q(X_i)
-end
- end
-
-  for pointIndex = 1:this.sampleSize
-    v = eigenMatrix((pointIndex-1)*reducedDimension+1:pointIndex*reducedDimension,:); % v_i
-    % [U,~,V] = svd(v);
-    this.vs{pointIndex} = v;
-    if this.newNormalization
-      vTv{pointIndex} = this.vs{pointIndex}' * this.localEigenVals{pointIndex} ^ 2 * this.vs{pointIndex};
-      this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.localEigenVals{pointIndex} * this.vs{pointIndex}; % H(X_i)
-    else
-      this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.vs{pointIndex}; % H(X_i)
-      vTv{pointIndex} = this.vs{pointIndex}' * this.vs{pointIndex};
     end
-  end
+    for i = 1:this.sampleSize
+        this.vs{i} = linsolve(this.localPCs{i}, this.projectionJacobians{i})
+    end
+end
 
 
     

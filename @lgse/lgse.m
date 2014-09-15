@@ -13,6 +13,7 @@ classdef lgse < handle
     kernels
     projectionJacobians
     vs
+    history
     localPCs
     localEigenVals
     
@@ -76,7 +77,7 @@ classdef lgse < handle
       this.projectionJacobians = newProjections;
     end
     
-     H = calculateJacobianComponent(this, index, dimensionIndex, kernels, iteration_number)
+     calculateJacobianComponent(this, index, dimensionIndex, kernels, iteration_number)
     
     constructCompressedSpace(model);
     

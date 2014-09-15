@@ -1,4 +1,4 @@
-trainSize = 200;
+trainSize = 100;
 rng(0);
 [trainX, trainTangentSpace, parametrization] = ...
     generateSampleOnSurface(trainSize, 'ellipsoid');
