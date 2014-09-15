@@ -5,6 +5,13 @@ rng(0);
 mapping = lgse('EuclideanMetricsThreshold', 10, 'EigenValuesThreshold',...
                 Inf, 'CauchyBinetMetricsThreshold', 0.2, 'KernelWidth',...
                 1,'oldWayOptimization', false);
+[trainX, indexes] = sortrows(trainX);
+parametrization = parametrization(indexes, :);
+tmp = trainTangentSpace;
+for pointIndex = 1:trainSize
+  trainTangentSpace{pointIndex} = tmp{indexes(pointIndex)};
+end
+clear tmp
             
 [trainX, trainTangentSpace, parametrization] = ...
     generateSampleOnSurface(trainSize, 'ellipsoid');

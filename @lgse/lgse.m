@@ -17,6 +17,8 @@ classdef lgse < handle
     localPCs
     localEigenVals
     
+    currentDelta % current delta for optimization debug 
+    historyDelta % current delta for optimization debug  
     
     EuclideanMetricsThreshold % \epsiolon_0
     EigenValuesThreshold % \epsilon_1
@@ -77,7 +79,8 @@ classdef lgse < handle
       this.projectionJacobians = newProjections;
     end
     
-     calculateJacobianComponent(this, index, dimensionIndex, kernels, iteration_number)
+     calculateJacobianComponent(this, dimensionIndex, kernels, iteration_number)
+     calculateDelta(this, kernels, dimensionIndex)
     
     constructCompressedSpace(model);
     

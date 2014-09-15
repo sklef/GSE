@@ -105,20 +105,24 @@ if this.oldWayOptimization
       this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.localEigenVals{pointIndex} * this.vs{pointIndex}; % H(X_i)
     else
       this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.vs{pointIndex}; % H(X_i)
-     vTv{pointIndex} = this.vs{pointIndex}' * this.vs{pointIndex};
+      vTv{pointIndex} = this.vs{pointIndex}' * this.vs{pointIndex};
    end
  end
 else
     for index = 1:this.sampleSize
         this.projectionJacobians{index} = this.localPCs{index};
     end
+    maxIterations = 100;
     for currentDim = 1:this.reducedDimension
-      for pointIndex = 1:this.sampleSize
-          this.calculateJacobianComponent(pointIndex, currentDim, this.kernels, 100);
-      end
+      this.calculateJacobianComponent(currentDim, this.kernels, maxIterations);
     end
+    %% just to plot delta
+    plot(0:maxIterations, log10(this.historyDelta), '-*')
+    xlabel('iteration')
+    ylabel('log10 Delta')
+    %%
     for i = 1:this.sampleSize
-        this.vs{i} = linsolve(this.localPCs{i}, this.projectionJacobians{i})
+        this.vs{i} = linsolve(this.localPCs{i}, this.projectionJacobians{i});
     end
 end
 
