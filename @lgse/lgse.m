@@ -81,6 +81,8 @@ classdef lgse < handle
     
      calculateJacobianComponent(this, dimensionIndex, kernels, iteration_number)
      calculateDelta(this, kernels, dimensionIndex)
+     updatePCs(this, dimension)
+     updateVs(this, dimension)
     
     constructCompressedSpace(model);
     

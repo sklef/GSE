@@ -1,4 +1,4 @@
-trainSize = 100;
+trainSize = 500;
 rng(0);
 [trainX, trainTangentSpace, parametrization] = ...
     generateSampleOnSurface(trainSize, 'ellipsoid');
@@ -16,7 +16,8 @@ clear tmp
 [trainX, trainTangentSpace, parametrization] = ...
     generateSampleOnSurface(trainSize, 'ellipsoid');
 mapping.train(trainX, 2);
-reducedTrainX = mapping.compressedTrainPoints
+reducedTrainX = mapping.compressedTrainPoints;
+figure()
 scatter(reducedTrainX(1, :), reducedTrainX(2, :), [], parametrization(:, 1), 'filled');
 
 %%

@@ -112,17 +112,22 @@ else
     for index = 1:this.sampleSize
         this.projectionJacobians{index} = this.localPCs{index};
     end
-    maxIterations = 100;
+    maxIterations = 10;
     for currentDim = 1:this.reducedDimension
       this.calculateJacobianComponent(currentDim, this.kernels, maxIterations);
+      this.updatePCs(currentDim);
+      this.updateVs(currentDim);
     end
     %% just to plot delta
-    plot(0:maxIterations, log10(this.historyDelta), '-*')
+    plot(0:maxIterations, log10(this.historyDelta{1}), '-*r')
+    hold on
+    plot(0:maxIterations, log10(this.historyDelta{2}), '-*b')
     xlabel('iteration')
     ylabel('log10 Delta')
     %%
-    for i = 1:this.sampleSize
-        this.vs{i} = linsolve(this.localPCs{i}, this.projectionJacobians{i});
+    for pointIndex = 1:this.sampleSize
+      vTv{pointIndex} = this.vs{pointIndex}' * this.vs{pointIndex};
+      diagonalLinearSpaceProjections{pointIndex} = eyeReducedDimension*sum(this.kernels(pointIndex, :));
     end
 end
 
@@ -222,7 +227,7 @@ end
 %   [cell2mat(RHS); zeros(this.reducedDimension, 1)], this.reducedDimension, this.sampleSize);
 
 
-compressedPoints = reshape([cell2mat(LHS); cell2mat(diagonalLinearSpaceProjectionsInitial)] \ ...
+compressedPoints = reshape([cell2mat(LHS); cell2mat(diagonalLinearSpaceProjections)'] \ ...
   [cell2mat(RHS); zeros(this.reducedDimension, 1)], this.reducedDimension, this.sampleSize);
 
 %% Postprocessing
