@@ -75,12 +75,14 @@ function [sample, trueTangentSpace, parametrization] = generateSampleOnSurface(p
       M = 2*pi*sqrt(3)/9.9;
       f=@(fi,h) sqrt(2*(cos(fi)).^2+3*(sin(fi)).^2);
       c=2*pi;
-
+      u = [];
+      v = [];
       while k <= pointsNumber
           x0 = [rand(1)*pi,rand(1)*2];
           test = [rand(1)*pi,rand(1)*2];
-
           if test <= f(x0(1), x0(2))/M/c;
+              u = [u; x0(1)];
+              v = [v; x0(2)];
               sample(k,1) = sqrt(3) * cos(x0(1));
               sample(k,2) = sqrt(2) * sin(x0(1));
               sample(k,3)=x0(2);

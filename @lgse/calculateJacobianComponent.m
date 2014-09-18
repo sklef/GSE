@@ -2,11 +2,11 @@ function calculateJacobianComponent(this, dimensionIndex, kernels, iteration_num
 projectionJacobiansNew = this.projectionJacobians;
 this.calculateDelta(kernels, dimensionIndex);
 historyDelta = [this.currentDelta];
-disp('_____________________');
+% disp('_____________________');
 for iteration = 1:iteration_number
-  if mod(iteration, 10) == 0
-    disp(['Current iteration=', num2str(iteration)]);
-  end
+%   if mod(iteration, 10) == 0
+%     disp(['Current iteration=', num2str(iteration)]);
+%   end
   for currentPoint = 1:this.sampleSize
     projectionJacobiansNew{currentPoint}(:, dimensionIndex) = projectionJacobiansNew{currentPoint}(:, dimensionIndex) * 0;
     normalization_coefficient = sum(kernels(:, currentPoint));
@@ -41,22 +41,3 @@ end
 this.historyDelta{dimensionIndex} = historyDelta;
 
 end
-
-% old version 2014/09/14
-% function calculateJacobianComponent(this, index, dimensionIndex, kernels, iteration_number)
-% normalization_coefficient = sum(kernels(:, index)) - kernels(index, index);
-% projection_matrix = this.localPCs{index} * this.localPCs{index}';
-% history = this.projectionJacobians{index}(:,dimensionIndex);
-% for iteration = 1:iteration_number
-%     for i = 1:this.sampleSize
-%         this.projectionJacobians{i}(:, dimensionIndex) = this.projectionJacobians{i}(:, dimensionIndex) + projection_matrix * kernels(index, i) * this.projectionJacobians{i}(:, dimensionIndex) * normalization_coefficient; 
-%     end
-%     iteration
-%     history = [history, this.projectionJacobians{index}(:, dimensionIndex)];
-%     
-% end  
-% if dimensionIndex == 1
-%     this.history{index} = history;
-% end
-% 
-% end

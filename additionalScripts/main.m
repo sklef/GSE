@@ -1,20 +1,23 @@
 trainSize = 500;
 rng(0);
 [trainX, trainTangentSpace, parametrization] = ...
-    generateSampleOnSurface(trainSize, 'ellipsoid');
-mapping = lgse('EuclideanMetricsThreshold', 10, 'EigenValuesThreshold',...
-                Inf, 'CauchyBinetMetricsThreshold', 0.2, 'KernelWidth',...
+    generateSampleOnSurface(trainSize, 'ellipsoid'); % 'cylinder'
+% %% tmp to get smaller part 
+% indexes = trainX(:, 3) > 0.5;
+% trainX = trainX(indexes, :);  
+% parametrization = parametrization(indexes, :); 
+% trainSize = size(trainX, 1);
+% %% 
+mapping = lgse('EuclideanMetricsThreshold', 0.5, 'EigenValuesThreshold',...
+                Inf, 'CauchyBinetMetricsThreshold', 10, 'KernelWidth',...
                 1,'oldWayOptimization', false);
-[trainX, indexes] = sortrows(trainX);
-parametrization = parametrization(indexes, :);
+% [trainX, indexes] = sortrows(trainX);
+% parametrization = parametrization(indexes, :);
 tmp = trainTangentSpace;
 for pointIndex = 1:trainSize
   trainTangentSpace{pointIndex} = tmp{indexes(pointIndex)};
 end
 clear tmp
-            
-[trainX, trainTangentSpace, parametrization] = ...
-    generateSampleOnSurface(trainSize, 'ellipsoid');
 mapping.train(trainX, 2);
 reducedTrainX = mapping.compressedTrainPoints;
 figure()

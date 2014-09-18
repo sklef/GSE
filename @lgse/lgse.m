@@ -19,6 +19,7 @@ classdef lgse < handle
     
     currentDelta % current delta for optimization debug 
     historyDelta % current delta for optimization debug  
+    historyDeltaCompression % current delta compression for optimization debug  
     
     EuclideanMetricsThreshold % \epsiolon_0
     EigenValuesThreshold % \epsilon_1
@@ -81,10 +82,11 @@ classdef lgse < handle
     
      calculateJacobianComponent(this, dimensionIndex, kernels, iteration_number)
      calculateDelta(this, kernels, dimensionIndex)
+     calculateDeltaCompression(this, kernels)
      updatePCs(this, dimension)
      updateVs(this, dimension)
     
-    constructCompressedSpace(model);
+    constructCompressedSpace(model, kernels, iteration_number);
     
     train(model, points, reducedDimension);
      

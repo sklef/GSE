@@ -24,7 +24,7 @@ for dimension = 1:this.reducedDimension
           colors{dimension});
   hold on
 end
-% quiver3(startsOrth(:,1), startsOrth(:,2), startsOrth(:,3), endsOrth(:,1), endsOrth(:,2), endsOrth(:,3), 'r')
+quiver3(startsOrth(:,1), startsOrth(:,2), startsOrth(:,3), endsOrth(:,1), endsOrth(:,2), endsOrth(:,3), 'r')
 hold off
 
 end
