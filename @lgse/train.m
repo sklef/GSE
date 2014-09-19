@@ -122,9 +122,11 @@ else
       this.updateVs(currentDim);
     end
     %% just to plot delta
-    plot(0:maxIterations, log10(this.historyDelta{1}), '-*r')
-    hold on
-    plot(0:maxIterations, log10(this.historyDelta{2}), '-*b')
+    for multistartIteration = 1:length(this.historyDelta{1})
+      plot(0:maxIterations, log10(this.historyDelta{1}{multistartIteration}), '-*r');
+      hold on
+    end
+    plot(0:maxIterations, log10(this.historyDelta{2}{1}), '-*b');
     xlabel('iteration')
     ylabel('log10 Delta')
     %%

@@ -13,16 +13,22 @@ function [sample, trueTangentSpace, parametrization] = generateSampleOnSurface(p
       p = @(u,v) 1/S*G(u,v);
       M = 12/S;
       alreadyGenerated = 1;
+      p0 = [];
+      p1 = [];
       while alreadyGenerated <= pointsNumber
           u = rand(1)*2 - 1;
           v = rand(1)*2 - 1;
           testProbability = rand(1);
           if testProbability <= p(u,v)/(M*q(u,v))
+              p0 = [p0; u];
+              p1 = [p1; v];
               sample(alreadyGenerated,:) = [x(u,v) y(u,v) z(u,v)];
               [trueTangentSpace{alreadyGenerated}, ~] = qr([1, 0, 2 * u; 0, 1, -2 * v]', 0);
               alreadyGenerated = alreadyGenerated+1;
           end
       end
+      u = p0;
+      v = p1;
     case 'ellipsoid'
       u=0:0.1:pi/2;
       v=0:0.1:2*pi;
