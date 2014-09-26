@@ -109,27 +109,61 @@ if this.oldWayOptimization
    end
  end
 else
-    for index = 1:this.sampleSize
-        this.projectionJacobians{index} = this.localPCs{index};
-    end
-    maxIterations = 100;
-    for currentDim = 1:(this.reducedDimension - 1)
-      this.calculateJacobianComponent(1, this.kernels, maxIterations);
-      for index = 1:this.sampleSize
-        this.localPCs{index} = findOrthogonalCompliment(this.localPCs{index}, ...
-           this.projectionJacobians{index}(:, currentDim));
+  %% brute force orthogonal
+  % solving generalized eigenvalue problem
+  options.disp = 0;
+  options.isreal = 1;
+  options.issym = 1;
+  if this.newNormalization
+    phi = phi2-phi1;
+    phi0 = phi0/sum(sum(phi0));
+    [eigenMatrix, ~] = eigs(phi, phi0, reducedDimension, 'SA', options);% W = {v_i}|i=1,n
+  else
+    phi = phi0-phi1;
+    phi0 = phi0/sum(sum(phi0));
+    [eigenMatrix, ~] = eigs(phi, phi0, reducedDimension, 'SA', options);% W = {v_i}|i=1,n
+  end
+  for pointIndex = 1:this.sampleSize
+    v = eigenMatrix((pointIndex-1)*reducedDimension+1:pointIndex*reducedDimension,:); % v_i
+    for dimension = 2:this.reducedDimension
+      for lowerDimension = 1:dimension-1
+        if norm(v(:, lowerDimension)) > 0
+          v(:, dimension) = v(:, dimension) - v(:, lowerDimension) * ...
+            (v(:, dimension)' * v(:, lowerDimension)) / (v(:, lowerDimension)' * v(:, lowerDimension));
+        end
       end
     end
-    %% just to plot delta
-    plot(0:maxIterations, log10(this.historyDelta), '-*')
-    xlabel('iteration')
-    ylabel('log10 Delta')
-    %%
-    for index = 1:this.sampleSize
-        this.vs{index} = eye(this.reducedDimension)
-        vTv{index} = eye(this.reducedDimension)
-        this.localPCs{index} = this.projectionJacobians{index}
-    end
+    %!!! for orthogonal use qr-factorization
+    this.vs{pointIndex} = v;
+    if this.newNormalization
+      vTv{pointIndex} = this.vs{pointIndex}' * this.localEigenVals{pointIndex} ^ 2 * this.vs{pointIndex};
+      this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.localEigenVals{pointIndex} * this.vs{pointIndex}; % H(X_i)
+    else
+      this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.vs{pointIndex}; % H(X_i)
+      vTv{pointIndex} = this.vs{pointIndex}' * this.vs{pointIndex};
+   end
+ end
+%     for index = 1:this.sampleSize
+%         this.projectionJacobians{index} = this.localPCs{index};
+%     end
+%     maxIterations = 100;
+%     for currentDim = 1:(this.reducedDimension - 1)
+%       this.calculateJacobianComponent(1, this.kernels, maxIterations);
+%       for index = 1:this.sampleSize
+%         this.localPCs{index} = findOrthogonalCompliment(this.localPCs{index}, ...
+%            this.projectionJacobians{index}(:, currentDim));
+%       end
+%     end
+%     %% just to plot delta
+%     plot(0:maxIterations, log10(this.historyDelta), '-*')
+%     xlabel('iteration')
+%     ylabel('log10 Delta')
+%     %%
+%     for index = 1:this.sampleSize
+%         this.vs{index} = eye(this.reducedDimension)
+%         vTv{index} = eye(this.reducedDimension)
+%         this.localPCs{index} = this.projectionJacobians{index}
+%     end
 end
 
 

@@ -98,6 +98,51 @@ function [sample, trueTangentSpace, parametrization] = generateSampleOnSurface(p
               k = k+1;
           end
       end
+    case 'sphere'
+      u=0:0.1:pi/2;
+      v=0:0.1:2*pi;
+      size(u);
+      size(v);
+      u=[u 0];
+      v=[v 0];
+      [u v]=meshgrid(u,v);
+
+      SX = 2 * pi; %Poschitali v wolframalpha
+
+      G=sqrt( (cos(u).^2.*cos(v).^2+cos(u).^2+1).*(sin(u).^2.*sin(v).^2+sin(u).^2) -(cos(u).*sin(u).*cos(v).*sin(v)).^2 );
+      size(G);
+
+      p=1/SX*G;
+      q=1/(pi/2*2*pi);
+      max_p=max(max(p));
+
+      M=max_p/q;
+
+      s=[];
+      k=1;%proverka uslovii dli while
+      while(k==1)
+          u0=rand()*pi/2;
+          v0=rand()*2*pi;
+
+          t=func_p(u0,v0)/M/q;
+          if (t > 1)
+            disp(t);
+          end
+          if ( rand()<=t)
+              s=[s; u0 v0];
+          end
+          if (size(s,1)==pointsNumber)
+              k=0;
+          end;
+      end
+
+      u=s(:,1);
+      v=s(:,2);
+      for i=1:pointsNumber
+          sample(i, :) = [sin(u(i)).*cos(v(i)), sin(u(i)).*sin(v(i)), cos(u(i))];
+          [trueTangentSpace{i}, ~] = qr([cos(u(i)).*cos(v(i)), cos(u(i)).*sin(v(i)), -sin(u(i)); ...
+            -sin(u(i)).*sin(v(i)), sin(u(i)).*cos(v(i)), 0]', 0);
+      end 
   end
   parametrization = [u, v];
 end

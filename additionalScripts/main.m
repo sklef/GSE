@@ -1,17 +1,23 @@
-trainSize = 500;
+trainSize = 1000;
 rng(0);
+%% points from generateSampleOnSurface
 [trainX, trainTangentSpace, parametrization] = ...
-    generateSampleOnSurface(trainSize, 'ellipsoid'); % 'cylinder' %  'saddle'
-%%
+    generateSampleOnSurface(trainSize, 'saddle'); % 'ellipsoid'  %  'cylinder' % 'ellipsoid' % 'sphere'
+%% points from getPointsOnParametrizedSwissRoll
+% parameters.center = [0 0 0];
+% parameters.alpha = 2;
+% inputPoints = rand(trainSize, 2);
+% [trainX, parametrization] = getPointsOnParametrizedSwissRoll(inputPoints, parameters);
+%
 % %% tmp to get smaller part 
 % indexes = parametrization(:, 1) < pi / 4;
 % trainX = trainX(indexes, :);  
 % parametrization = parametrization(indexes, :); 
 % trainSize = size(trainX, 1);
-% %% 
+%% 
 %% trainX(:, 1) = (trainX(:, 1) - min(trainX(:, 1))).^2; % strange example
 %%
-mapping = lgse('EuclideanMetricsThreshold', 0.5, 'EigenValuesThreshold',...
+mapping = lgse('EuclideanMetricsThreshold', 1, 'EigenValuesThreshold',...
                 Inf, 'CauchyBinetMetricsThreshold', 10, 'KernelWidth',...
                 1,'oldWayOptimization', false);
 % [trainX, indexes] = sortrows(trainX);
@@ -27,6 +33,9 @@ figure()
 scatter(reducedTrainX(1, :), reducedTrainX(2, :), [], parametrization(:, 1), 'filled');
 figure()
 scatter3(trainX(:, 1), trainX(:, 2), trainX(:, 3), [], parametrization(:, 1), 'filled');
+recconstructedPoints = mapping.decompress(mapping.compressedTrainPoints);
+figure()
+scatter3(recconstructedPoints(:, 1), recconstructedPoints(:, 2), recconstructedPoints(:, 3), [], parametrization(:, 1), 'filled');
 
 %% try rotations
 % mapping.calculateDelta(mapping.kernels, 1);

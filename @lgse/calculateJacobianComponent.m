@@ -2,7 +2,7 @@ function calculateJacobianComponent(this, dimensionIndex, kernels, iteration_num
 projectionJacobiansNew = this.projectionJacobians;
 bestProjectionJacobians = this.projectionJacobians;
 % disp('_____________________');
-numberMultistartIterations = 5;
+numberMultistartIterations = 1; % 5
 this.calculateDelta(kernels, dimensionIndex);
 bestDelta = this.currentDelta;
 historyDelta = cell(numberMultistartIterations, 1);
@@ -10,14 +10,14 @@ if dimensionIndex == this.reducedDimension
   numberMultistartIterations = 1;
 end
 for multistartIteration = 1:numberMultistartIterations
-  disp(['multistartIteration=', num2str(multistartIteration)]);
+  % disp(['multistartIteration=', num2str(multistartIteration)]);
   for pointIndex = 1:this.sampleSize
     this.projectionJacobians{pointIndex}(:, dimensionIndex:end) = this.localPCs{pointIndex}(:, dimensionIndex:end) * ...
       orth(rand(this.reducedDimension - dimensionIndex + 1));
   end
-  if dimensionIndex == 1
-    disp(this.projectionJacobians{pointIndex}(:, 1));
-  end
+%   if dimensionIndex == 1
+%     disp(this.projectionJacobians{pointIndex}(:, 1));
+%   end
   this.calculateDelta(kernels, dimensionIndex);
   historyDelta{multistartIteration} = [this.currentDelta];
   for iteration = 1:iteration_number

@@ -14,7 +14,7 @@ for pointIndex = 1:this.sampleSize
   endsOrth = [endsOrth; t(:, 1)'];
 end
 colors = {'b', 'm'};
-for dimension = 1:this.reducedDimension
+for dimension = 2 % this.reducedDimension % 1:this.reducedDimension
   quiver3(starts(2 * (0:this.sampleSize-1) + dimension,1), ...
           starts(2 * (0:this.sampleSize-1) + dimension,2), ...
           starts(2 * (0:this.sampleSize-1) + dimension,3), ...
@@ -24,7 +24,7 @@ for dimension = 1:this.reducedDimension
           colors{dimension});
   hold on
 end
-quiver3(startsOrth(:,1), startsOrth(:,2), startsOrth(:,3), endsOrth(:,1), endsOrth(:,2), endsOrth(:,3), 'r')
+%quiver3(startsOrth(:,1), startsOrth(:,2), startsOrth(:,3), endsOrth(:,1), endsOrth(:,2), endsOrth(:,3), 'r')
 hold off
 
 end
