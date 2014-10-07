@@ -125,16 +125,17 @@ else
   end
   for pointIndex = 1:this.sampleSize
     v = eigenMatrix((pointIndex-1)*reducedDimension+1:pointIndex*reducedDimension,:); % v_i
-    for dimension = 2:this.reducedDimension
-      for lowerDimension = 1:dimension-1
-        if norm(v(:, lowerDimension)) > 0
-          v(:, dimension) = v(:, dimension) - v(:, lowerDimension) * ...
-            (v(:, dimension)' * v(:, lowerDimension)) / (v(:, lowerDimension)' * v(:, lowerDimension));
-        end
-      end
-    end
-    %!!! for orthogonal use qr-factorization
-    this.vs{pointIndex} = v;
+    [U, ~, V] = svd(v);
+%     for dimension = 2:this.reducedDimension
+%       for lowerDimension = 1:dimension-1
+%         if norm(v(:, lowerDimension)) > 0
+%           v(:, dimension) = v(:, dimension) - v(:, lowerDimension) * ...
+%             (v(:, dimension)' * v(:, lowerDimension)) / (v(:, lowerDimension)' * v(:, lowerDimension));
+%         end
+%       end
+%     end
+%     %!!! for orthogonal use qr-factorization
+    this.vs{pointIndex} = U * V';
     if this.newNormalization
       vTv{pointIndex} = this.vs{pointIndex}' * this.localEigenVals{pointIndex} ^ 2 * this.vs{pointIndex};
       this.projectionJacobians{pointIndex} = this.localPCs{pointIndex} * this.localEigenVals{pointIndex} * this.vs{pointIndex}; % H(X_i)
@@ -248,10 +249,6 @@ for pointIndex1 = 1:this.sampleSize
   LHSdiag = zeros(this.reducedDimension);
   for pointIndex2 = [1:pointIndex1-1 pointIndex1+1:this.sampleSize]
     tmp = this.kernels(pointIndex1, pointIndex2) * (vTv{pointIndex1} + vTv{pointIndex2});
-    size(vTv{1})
-    this.kernels(pointIndex1, pointIndex2) 
-    
-    size(LHSdiag)
     LHS{pointIndex1, pointIndex2} = tmp;
     LHSdiag = LHSdiag - tmp;
     RHStmp = RHStmp + this.kernels(pointIndex1, pointIndex2) * ...
