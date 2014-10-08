@@ -20,8 +20,8 @@ function metrics = calculateLocalIsometry(points, compressedPoints, kernelWidths
       meanWeightedPointsDistance = meanWeightedPointsDistance + reshape(kernels(point1, point2, :), 1, []) * pointsDistance;
     end
   end
-  metrics(1, :) = metrics(1, :) ./ reshape(sum(sum(kernels, 1), 2), 1, []);
-  metrics(3, :) = metrics(3, :) ./ reshape(sum(sum(kernels, 1), 2), 1, []);
+  metrics(1, :) = metrics(1, :) ./ (reshape(sum(sum(kernels, 1), 2), 1, []) - numberPoints); % minus diag elements
+  metrics(3, :) = metrics(3, :) ./ (reshape(sum(sum(kernels, 1), 2), 1, []) - numberPoints); % minus diag elements
   metrics(2, :) = metrics(2, :) ./ meanWeightedPointsDistance;
 end
 
