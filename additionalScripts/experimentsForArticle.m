@@ -1,9 +1,10 @@
 trainSizes = [250, 500, 1000, 2000]; % [100, 200]
-testSize = 10000;
+testSize = 1000;
 rng(0);
-surfaceNames = {'saddle', 'ellipsoid',  'cylinder'};
+surfaceNames = {'cylinder', 'saddle', 'ellipsoid'}; % ,  
 methods = {'GSE', 'OGSE'};
 MSE = zeros(length(methods), length(trainSizes), length(surfaceNames));
+metics = cell(length(surfaceNames), length(trainSizes), length(methods));
 for surfaceIndex = 1:length(surfaceNames)
   disp(surfaceNames{surfaceIndex});
   surfaceName = surfaceNames{surfaceIndex};
@@ -33,6 +34,23 @@ for surfaceIndex = 1:length(surfaceNames)
       MSE(methodIndex, trainSizeIndex, surfaceIndex) = ...
         sqrt(trace((recconstructedTestX - testX) * (recconstructedTestX - testX)') / trainSize);
       save('MSE.mat', 'MSE');
+      kernelWidths = mapping.KernelWidth * (2 .^ [-5:5]);
+      metrics{surfaceIndex, trainSizeIndex, methodIndex} = ...
+        calculateLocalIsometry(testX, reducedTestX', kernelWidths, mapping.EuclideanMetricsThreshold);
+      save('metrics.mat', 'metrics');
+      randomPairsNumber = 1000;
+      firstPoints = randi(testSize, randomPairsNumber);
+      secondPoints = randi(testSize, randomPairsNumber);
+      for pair = 1:randomPairsNumber
+        distance(pair) = sqrt(sum((testX(firstPoints(pair), :) - testX(secondPoints(pair), :)) .^ 2));
+        distanceReduced(pair) = sqrt(sum((reducedTestX(:, firstPoints(pair)) - reducedTestX(:, secondPoints(pair))) .^ 2));
+      end
+      handle = figure();
+      scatter(distance, distanceReduced, '*r');
+      hold on
+      plot([0, max(max(distance), max(distanceReduced))], [0, max(max(distance), max(distanceReduced))], 'b');
+      saveas(handle, strcat(surfaceName, '-Distances-', num2str(trainSizes(trainSizeIndex)), methods{methodIndex}, '.png'));
+      close(handle);
     end
   end
 end
