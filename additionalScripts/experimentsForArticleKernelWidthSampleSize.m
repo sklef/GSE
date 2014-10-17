@@ -33,14 +33,14 @@ for surfaceIndex = 1:length(surfaceNames)
       reducedTestX = mapping.compress(testX);
       handle = figure('Visible','Off');
       scatter(reducedTestX(1, :), reducedTestX(2, :), [], parametrizationTest(:, 1), 'filled');
-      saveas(handle, strcat(surfaceName, 'Compressed-kernel', num2str(kernelWidths(trainSizeIndex)), '-', methods{methodIndex}, '.png'));
+      saveas(handle, strcat(surfaceName, 'Compressed-kernel', num2str(trainSizes(trainSizeIndex)), '-', methods{methodIndex}, '.png'));
       close(handle);
       recconstructedTestX = mapping.decompress(reducedTestX);
       MSE(methodIndex, trainSizeIndex, surfaceIndex) = ...
         sqrt(trace((recconstructedTestX - testX) * (recconstructedTestX - testX)') / trainSize);
       save('MSE.mat', 'MSE');
       metrics{surfaceIndex, trainSizeIndex, methodIndex} = ...
-        calculateLocalIsometry(testX, reducedTestX', kernelWidths(trainSizeIndex), mapping.EuclideanMetricsThreshold);
+        calculateLocalIsometry(testX, reducedTestX', trainSizes(trainSizeIndex), mapping.EuclideanMetricsThreshold);
       save('metrics.mat', 'metrics');
       randomPairsNumber = 1000;
       firstPoints = randi(testSize, randomPairsNumber);
@@ -61,20 +61,20 @@ for surfaceIndex = 1:length(surfaceNames)
   for errorIndex = 1:3
     handle = figure('Visible','Off');
     hold on
-    GSEMetricToPlot = zeros(1, length(kernelWidths));
+    GSEMetricToPlot = zeros(1, length(trainSizes));
     OGSEMetricToPlot = GSEMetricToPlot;
     for trainSizeIndex = 1:length(trainSizes)
       GSEMetricToPlot(trainSizeIndex) = metrics{surfaceIndex, trainSizeIndex, 1}(errorIndex, 1);
       OGSEMetricToPlot(trainSizeIndex) = metrics{surfaceIndex, trainSizeIndex, 2}(errorIndex, 1);
     end
-    plot(kernelWidths, GSEMetricToPlot, '-*r');
-    plot(kernelWidths, OGSEMetricToPlot, '-vb');
+    plot(trainSizes, GSEMetricToPlot, '-*r');
+    plot(trainSizes, OGSEMetricToPlot, '-vb');
     saveas(handle, strcat('pictures', filesep, num2str(errorIndex), surfaceName, '-Metrics-KW', '.png'));
     close(handle);
   end
   handle = figure('Visible','Off');
   hold on
-  GSEMetricToPlot = zeros(1, length(kernelWidths));
+  GSEMetricToPlot = zeros(1, length(trainSizes));
   OGSEMetricToPlot = GSEMetricToPlot;
   for trainSizeIndex = 1:length(trainSizes)
     GSEMetricToPlot(trainSizeIndex) = metrics{surfaceIndex, trainSizeIndex, 1}(errorIndex, 1);
