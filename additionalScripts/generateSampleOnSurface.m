@@ -142,7 +142,28 @@ function [sample, trueTangentSpace, parametrization] = generateSampleOnSurface(p
           sample(i, :) = [sin(u(i)).*cos(v(i)), sin(u(i)).*sin(v(i)), cos(u(i))];
           [trueTangentSpace{i}, ~] = qr([cos(u(i)).*cos(v(i)), cos(u(i)).*sin(v(i)), -sin(u(i)); ...
             -sin(u(i)).*sin(v(i)), sin(u(i)).*cos(v(i)), 0]', 0);
-      end 
+      end
+    case 'cone'
+      sample = zeros(pointsNumber,3);
+      k = 1;
+      M = 4 / 3;
+      f=@(fi,h)(h * (2 / 3 / pi));
+      u = [];
+      v = [];
+      while k <= pointsNumber
+          x0 = [rand(1)*pi, rand(1)+1];
+          if rand(1) * M / pi <= f(x0(1), x0(2))
+              u = [u; x0(1)];
+              v = [v; x0(2)];
+              sample(k,1) = cos(x0(1)) * x0(2);
+              sample(k,2) = sin(x0(1)) * x0(2);
+              sample(k,3)=x0(2);
+              sample(k, :) = sample(k, :);
+              [trueTangentSpace{k}, ~] = qr([-sin(x0(1)) * x0(2), cos(x0(1)) * x0(2), 0; cos(x0(1)), sin(x0(1)), 1]', 0);
+              trueTangentSpace{k} = trueTangentSpace{k}; % * randMatrix; %
+              k = k+1;
+          end
+      end
   end
   parametrization = [u, v];
 end
